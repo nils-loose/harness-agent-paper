@@ -209,6 +209,10 @@ Our contributions advance the state of automated harness generation:
 \input{sections/related-work.tex}
 
 \section{Conclusion and Outlook}
+
+\paragraph{Threats to Validity}
+Our evaluation reports single-run coverage measurements; while 12-hour campaigns reduce stochastic variance, multiple runs would strengthen validity. Benchmark selection is limited to methods with existing OSS-Fuzz harnesses, potentially biasing toward feasible targets. We were unable to reproduce OSS-Fuzz-Gen~\cite{CITE:OSSFuzzGen} on Java targets due to model output parsing issues; we plan to include LLM-baseline comparisons in future work. Results are specific to Claude 4.5 Sonnet, though the agent architecture is model-agnostic.
+
 TODO
 
 
