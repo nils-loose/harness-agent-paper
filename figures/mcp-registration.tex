@@ -1,0 +1,24 @@
+\begin{figure}[t]
+\begin{lstlisting}[style=yaml,caption={MCP tool schema for the \texttt{get\_method\_code} tool from CodeContextMCP server. Tools are exposed to ReAct agents based on tag-based access control.},label={fig:mcp-tool-schema},numbers=left,numberstyle=\tiny\color{gray},frame=single]
+get_method_code:
+  description:
+    Get source code for a specific method
+  method_signature:
+    type: string
+    description:
+      Source code method signature (e.g.,
+      'String someMethod(String, int)' or
+      'someMethod(String, int)'). If possible 
+      provide full signature including parameters 
+      for precise matching, however to get all 
+      overloads 'someMethod' also works.
+  class_name:
+    type: string
+    description:
+      (Fully qualified) class name (e.g.,
+      'com.example.Util'). If possible, use the
+      fully qualified name. Required for accurate
+      matching!
+    default: null
+\end{lstlisting}
+\end{figure}

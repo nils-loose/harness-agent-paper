@@ -1,7 +1,45 @@
 \documentclass[sigconf,review,anonymous]{acmart}
 
 \usepackage{listings}
+\usepackage[inkscapeopt={-D}]{svg}
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{pifont}
+\usepackage{rotating}
+\usepackage{listings}
+\usepackage{xcolor}
 
+% YAML syntax highlighting - clean for academic papers
+\lstdefinestyle{yaml}{
+  basicstyle=\ttfamily\small,
+  sensitive=false,
+  comment=[l]{\#},
+  commentstyle=\color{gray},
+  showstringspaces=false,
+  emphstyle=\bfseries,
+  emph={get_method_code,description,method_signature,type,class_name,default},
+  identifierstyle=,
+  keywords={null, string},
+}
+
+% Java syntax highlighting
+\definecolor{javared}{rgb}{0.6,0,0}          % for strings
+\definecolor{javagreen}{rgb}{0.25,0.5,0.35}  % for comments
+\definecolor{javapurple}{rgb}{0.5,0,0.35}    % for keywords
+\definecolor{javadocblue}{rgb}{0.25,0.35,0.75} % for javadoc
+
+\lstset{language=Java,
+  basicstyle=\ttfamily\small,
+  keywordstyle=\color{javapurple}\bfseries,
+  stringstyle=\color{javared},
+  commentstyle=\color{javagreen},
+  morecomment=[s][\color{javadocblue}]{/**}{*/},
+  showstringspaces=false,
+  tabsize=2
+}
+
+% Define checkmark symbol
+\newcommand{\cmark}{\ding{51}}
 
 \setcopyright{acmlicensed}
 \copyrightyear{2018}
@@ -12,7 +50,9 @@
   2018}{Woodstock, NY}
 \acmISBN{978-1-4503-XXXX-X/2018/06}
 \acmSubmissionID{123}
-
+% Define text styles for SVG rendering
+\def\axtext{\footnotesize\sffamily}
+\def\ticktext{\scriptsize\sffamily}
 
 
 \begin{document}
@@ -203,90 +243,8 @@ OSS-Fuzz-Gen's Java extension provides language-specific prompt templates that g
 
 
 
-
-\section{Automated Harness Generation}
-
-\begin{figure*}[t]
-    \centering
-    \includegraphics[width=\linewidth, height=4cm]{workflow.png}
-    \caption{Multi-agent workflow architecture. Specialized agents collaborate through shared context to synthesize, validate, and iteratively refine fuzzing harnesses until convergence.}
-    \label{fig:methodology:system-overview}
-\end{figure*}
-
-We present a multi-agent approach to automated fuzzing harness generation that addresses the central challenge of scaling library fuzzing without requiring consumer code or manual intervention. Our method decomposes the synthesis problem into specialized tasks, assigns each to a dedicated agent, and orchestrates their collaboration through a shared workspace that accumulates knowledge and convergence signals across iterations.
-
-\subsection{Design Principles}
-
-Our approach is guided by three foundational principles. First, we embrace \emph{tool-augmented reasoning}, where agents are equipped with structured query interfaces to code analysis backends rather than relying on pre-computed summaries or fixed templates. This enables adaptive exploration: agents decide what information to retrieve based on their evolving understanding of the target API. Second, we adopt \emph{natural communication between agents}, rejecting rigid structured representations in favor of natural language summaries that preserve reasoning nuance and reduce brittleness to schema changes. Third, we implement \emph{feedback-driven convergence}, where each synthesis-validation cycle produces observable signals (e.g., compilation errors, coverage deltas, crash reports) that inform subsequent refinement decisions.
-
-
-\subsection{Workflow Architecture}
-
-Figure~\ref{fig:methodology:system-overview} illustrates our staged workflow. The pipeline accepts a target specification, a library identifier and method signature, and produces a compilable, coverage-optimized harness through five primary stages: \emph{environment preparation}, \emph{exploratory research}, \emph{harness synthesis}, \emph{validation}, and \emph{adaptive refinement}.
-
-The workflow is orchestrated as a state machine where each stage contributes updates to a shared context object. This context accumulates artifacts (harness code, dependencies, coverage metrics), diagnostic signals (compilation errors, uncovered branches), and convergence indicators (iteration counts, coverage plateaus). Transitions between stages are governed by success criteria and adaptive routers that may trigger refinement loops, restart generation, or terminate upon convergence. In the following subsections, we'll highlight each of those stages:
-
-\subsection{Environment Preparation}
-
-Given a Maven coordinate triple $(g, a, v)$, the system first establishes a compilable build context. We retrieve three artifact types from Maven Central: binary JARs (for fuzzing execution), source JARs (for code exploration), and Javadoc JARs (for API documentation). Dependency resolution follows POM metadata to recursively assemble a complete classpath, which is then embedded into a build template compatible with the Jazzer fuzzing framework.
-
-In parallel, we extract structural metadata that guides agent reasoning. We employ Class Hierarchy Analysis (CHA)~\cite{DBLP:conf/ecoop/DeanGC95}, a conservative call graph construction algorithm, to compute reachable methods from the target entry point. CHA operates by resolving virtual method calls using class hierarchy information: for each call site, it considers all methods that could be invoked based on the receiver type's position in the inheritance lattice. While CHA may introduce imprecision by including unreachable paths (due to its conservative nature), it provides complete coverage guarantees, ensuring no executable method is omitted, which is critical for our fuzzing objectives. The resulting call graph is traversed breadth-first to a configurable depth, yielding a set of reachable methods with their signatures, declaring classes, and call-chain distances. This graph serves dual purposes: it informs the research agent about relevant API interactions and later provides refinement targets by identifying uncovered but reachable code regions.
-
-By front-loading this analysis, we avoid redundant computation across refinement iterations and provide agents with a structural roadmap of the code under test.
-
-\subsection{Tool-Augmented Code Exploration}
-
-A central challenge in harness synthesis is understanding the target API's contracts, preconditions, and typical usage patterns without access to consumer code. Prior approaches either rely on pre-computed knowledge bases (which quickly become stale) (CITE) or perform exhaustive static analysis (which scales poorly) (CITE). We address this through \emph{conversational code exploration}: a research agent equipped with structured query tools navigates the codebase autonomously, gathering fuzzing-relevant insights on demand.
-
-To enable this adaptive exploration, we introduce a \emph{Model Context Protocol (MCP)} architecture that decouples code analysis capabilities from agent reasoning logic. This separation offers three key advantages: (1)~\textbf{Modularity}—analysis backends can be upgraded or replaced without modifying agent prompts; (2)~\textbf{Lazy evaluation}—agents retrieve only the information they deem relevant, reducing token consumption; and (3)~\textbf{Composability}—multiple analysis modalities can be integrated seamlessly.
-
-We implement three specialized MCP servers, each exposing a domain-specific query interface:
-
-\begin{itemize}
-    \item \textbf{Documentation Server.} Indexes Javadoc archives to provide on-demand retrieval of API contracts. Given a fully qualified class name and optional method signature, it returns structured metadata including parameter types, return types, exception specifications, and natural-language descriptions. This enables agents to understand method semantics without parsing raw bytecode or decompiled sources.
-
-    \item \textbf{Call Graph Server.} Exposes the CHA-derived call graph as a queryable structure. Agents submit queries specifying a root method and depth limit, receiving a hierarchical tree of reachable methods with invocation relationships. This tool proves particularly valuable during research, where agents use it to discover deep interaction patterns, identify complex initialization sequences, and reason about API dependencies.
-
-    \item \textbf{Source Code Server.} Indexes the unpacked source JAR to support fine-grained implementation retrieval. Agents query by class and method signature, receiving the full implementation along with surrounding context (e.g., class-level fields, inner classes, adjacent methods). Unlike static analysis tools that extract rigid features, this server provides raw source text, allowing LLMs to apply their learned code understanding directly.
-\end{itemize}
-
-Each server runs as a standalone subprocess with standard I/O transport, enabling asynchronous tool invocation without coupling to specific analysis implementations. This architecture transforms what would be a brittle pipeline of static analysis passes into a flexible reasoning environment where agents autonomously decide which code aspects to examine.
-
-All research agent operates in a ReAct loop~\cite{DBLP:conf/iclr/YaoZYDN023:ReAct}, alternating between reasoning steps and tool invocations. Unlike traditional static analysis that processes all code uniformly, the agent dynamically constructs its exploration strategy based on evolving understanding. For instance, when encountering a method with complex preconditions, it may: (1)~query the documentation server for contract specifications, (2)~traverse the call graph to identify initialization helpers, and (3)~retrieve source implementations of those helpers to understand setup requirements.
-
-Critically, we instruct the agent to prioritize \emph{fuzzing-oriented knowledge}: valid input ranges, boundary conditions, exception paths, and API call dependencies. This focus prevents exhaustive documentation harvesting and concentrates effort on information that directly informs harness quality. The agent's output is a natural-language research summary, a deliberate choice that preserves reasoning context and avoids brittleness of structured formats prone to parsing failures. This summary is passed directly to the generation agent, maintaining a chain of reasoning across synthesis stages.
-
-\subsection{Harness Synthesis and Validation}
-
-Given the research summary, a generation agent synthesizes an initial harness candidate. This agent receives detailed templates explaining the fuzzing framework's interface alongside the research findings. It proposes a harness implementation, reasons about potential issues, and may invoke code retrieval tools for clarification. The output includes harness source code and a dependency manifest.
-
-Synthesis is decoupled from validation: the generation agent focuses on producing semantically plausible code without attempting compilation. Validation is delegated to a separate compilation agent that embeds the harness into the prepared build template and invokes the build system. If compilation fails, this agent diagnoses the error by parsing messages to identify root causes such as unresolved symbols or type mismatches and formulates repairs. For tractable errors (missing imports, dependency omissions), it applies automatic fixes; for complex failures (API misuse, version incompatibilities), it may query tools to refine its understanding before retrying.
-
-This separation of concerns reflects a key insight: generation and debugging require distinct reasoning modes. Generation benefits from creative exploration of API usage patterns, while debugging demands systematic diagnosis and targeted correction. By assigning these tasks to specialized agents, we improve both synthesis quality and repair success rates.
-
-\subsection{Coverage-Guided Refinement}
-
-Upon successful compilation, the harness enters a fuzzing phase where it executes under coverage instrumentation to measure code coverage. We configure time-bounded fuzzing (rather than iteration-bounded) to ensure consistent resource budgets across targets with varying complexity. Fuzzing produces three critical signals: line and branch coverage percentages, a map of uncovered code regions, and any crash-triggering inputs with stack traces.
-
-These signals drive a refinement loop orchestrated by a critic-agent pair. The critic analyzes coverage gaps—uncovered branches, unexplored call paths, missing API interactions—and estimates improvement potential. It identifies specific weaknesses (e.g., insufficient input diversity, missing initialization sequences) and assigns a confidence score indicating refinement feasibility. If promising opportunities exist, a refinement agent modifies the harness to address the identified gaps, leveraging code exploration tools to understand uncovered regions.
-
-The refined harness is recompiled and fuzzed, closing the feedback loop. This cycle repeats until convergence criteria are met: coverage improvement plateaus (less than 1\% gain for three consecutive iterations), iteration budgets are exhausted, or the critic's confidence drops below a threshold. To prevent oscillation between equivalent harnesses, we maintain content-addressed storage with hash-based deduplication, detecting cycles and prompting agents to explore alternative strategies.
-
-\subsection{Convergence and Reproducibility}
-
-Termination is governed by a multi-criteria policy that balances coverage maximization with resource constraints. We detect convergence through coverage plateaus (indicating local optima), enforce hard iteration limits (bounding compute budgets), and monitor for duplicate harnesses (preventing infinite loops). Upon termination, the system records comprehensive metadata—iteration traces, agent decisions, coverage evolution—enabling post-hoc analysis of synthesis trajectories.
-
-To support reproducibility and experimentation, we implement checkpoint-resume mechanisms that snapshot workflow state at key stages. This allows researchers to resume from successful compilation points, varying only refinement strategies or fuzzing parameters without re-executing expensive analysis and generation phases. All artifacts are organized in session-based directories with content-addressed storage, ensuring that identical harnesses are deduplicated while preserving their evolution history through timeline metadata.
-
-\subsection{Implementation}
-
-Our prototype system is implemented in Python using the LangGraph framework for state machine orchestration and LangChain for LLM integration. We support both OpenAI (GPT-4) and Anthropic (Claude 3.5 Sonnet) models as reasoning backends, with temperature parameters tuned for code generation tasks (default: 0.3). Agent communication with analysis backends follows the Model Context Protocol (MCP), a standardized interface for tool-augmented LLM systems. Three MCP servers provide documentation retrieval (parsing Javadoc JARs), call graph queries (using SootUp~\cite{DBLP:conf/icse/SchottKB25:SootUp} with Class Hierarchy Analysis), and source code extraction (indexing unpacked source JARs).
-
-Coverage measurement integrates Jazzer's native instrumentation with a standalone JaCoCo server that exposes coverage metrics via REST API. We employ dual filtering—Jazzer's bytecode instrumentation scope and JaCoCo's measurement filter—to isolate target library coverage from framework initialization overhead. The compilation stage uses Gradle templates with automatic dependency injection, and harness code is instrumented with JaCoCo control hooks to ensure accurate per-run coverage isolation. Artifact storage follows a session-based schema with SHA-256 content addressing for harness deduplication, timeline tracking for evolution reconstruction, and JSON metadata for convergence analysis.
-
-
-\section{Evaluation}
-
+\input{sections/main-chapter.tex}
+\input{sections/evaluation.tex}
 
 
 

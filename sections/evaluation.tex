@@ -1,0 +1,45 @@
+\section{Evaluation}%
+\label{sec:evaluation}
+% The things we need to discuss here:
+% Runtime and monetary cost for generation of harnesses
+% commons-cli 
+% Total: 1.91$ 583K token 374s 
+% Researcher: 43 tool calls 19 iter
+% Generator: 5 tool calls 3 iter
+% Refinement loop: 0 loops
+% Patcher: 0 tool calls 0 iter
+% coverage analysis: 20 tool calls 11 iter
+% Refinement 0 tool calls 0 iter
+
+% jackson
+% Total: 4.75$ 1449K token 1057s 
+% Researcher: 23 tool calls 19 iter
+% Generator: 3 tool calls 4 iter
+% Refinement loop: 4 loops
+% Patcher: 0/0/0/0 tool calls 0/0/0/0 iter
+% coverage analysis: 9/11/5/15 tool calls 7/16/6/16 iter
+% Refinement 7/7/7/9 tool calls 5/6/5/5 iter
+
+% gson 
+% Total: 3.39$ 984K token 985s 
+% Researcher: 28 tool calls 16 iter
+% Generator: 5 tool calls 3 iter
+% Refinement loop: 4 loops
+% Patcher: 0/7/0/0 tool calls 0/4/0/0 iter
+% coverage analysis: 6/6/7/5 tool calls 4/5/5/4 iter
+% Refinement 9/18/21/13 tool calls 5/7/15/7 iter
+
+% jsoup 
+% Total: 6.69$ 2039K token 1336s 
+% Researcher: 36 tool calls 19 iter
+% Generator: 4 tool calls 3 iter
+% Refinement loop: 0 loops
+% Patcher: 6 tool calls 5 iter
+% coverage analysis: 17/14 tool calls 13/12 iter
+% Refinement 26 tool calls 15 iter
+% Overall coverage plot
+\input{figures/coverage-overall.tex}
+% The antlr4 case study
+\input{figures/case-study-coverage.tex}
+
+
