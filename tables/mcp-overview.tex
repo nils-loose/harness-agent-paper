@@ -1,0 +1,45 @@
+\begin{table}[t]
+\caption{Tool availability across DRAG workflow agents. MCP tools are provided by three Model Context Protocol servers that enable LLM agents to query code intelligence APIs.}
+\centering
+\setlength{\tabcolsep}{4pt}
+\renewcommand{\arraystretch}{1.1}
+\begin{tabular}{c l | c c c c c}
+\toprule
+& \multirow{2}{*}{\textbf{Tool}} & \multicolumn{5}{c}{\textbf{ReAct Agents}} \\
+\cmidrule(lr){3-7}
+& & \textbf{RSH} & \textbf{GEN} & \textbf{PAT} & \textbf{CVA} & \textbf{REF} \\
+\midrule
+\multirow{6}{*}{\rotatebox{90}{\textit{Docs}}}
+& \texttt{method\_doc} & \cmark & \cmark & \cmark & \cmark & \cmark \\
+& \texttt{class\_doc} & \cmark & \cmark & \cmark & \cmark & \cmark \\
+& \texttt{package\_doc} & \cmark & \cmark & \cmark & \cmark & \cmark \\
+& \texttt{list\_packages} & \cmark & \cmark & \cmark & \cmark & \cmark \\
+& \texttt{list\_classes} & \cmark & \cmark & \cmark & \cmark & \cmark \\
+& \texttt{list\_methods} & \cmark & \cmark & \cmark & \cmark & \cmark \\
+\midrule
+\multirow{5}{*}{\rotatebox{90}{\textit{Code}}}
+& \texttt{get\_code} & \cmark & \cmark & \cmark & \cmark & \cmark \\
+& \texttt{find\_def} & \cmark & \cmark & \cmark & \cmark & \cmark \\
+& \texttt{find\_refs} & \cmark & \cmark & \cmark & \cmark & \cmark \\
+& \texttt{grep} & \cmark & \cmark & \cmark & \cmark & \cmark \\
+& \texttt{find\_symbol} & \cmark & \cmark & \cmark & \cmark & \cmark \\
+\midrule
+\multirow{2}{*}{\rotatebox{90}{\textit{CG}}}
+& \texttt{reach\_methods} & -- & -- & -- & (\cmark) & -- \\
+& \texttt{path\_to\_method} & -- & -- & -- & \cmark & -- \\
+\midrule
+\multirow{2}{*}{\rotatebox{90}{\textit{Exec}}}
+& \texttt{compiler} & -- & -- & (\cmark) & -- & -- \\
+& \texttt{jazzer} & -- & -- & -- & (\cmark) & -- \\
+\bottomrule
+\end{tabular}
+\smallskip
+\begin{flushleft}
+\footnotesize
+\textbf{Agents:} RSH (Research), GEN (Generation), PAT (Patching), CVA (Coverage Analysis), REF (Refinement).
+\cmark~= Available, (\cmark)~= Static invocation (not queryable), --~= No access.
+\textbf{Categories:} Docs (Javadoc API documentation); Code (source code indexing); Graph (call graph analysis); Exec (compiler and fuzzer).
+\end{flushleft}
+\vspace{-3mm}
+\label{tab:tool-availability}
+\end{table}

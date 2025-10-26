@@ -1,0 +1,86 @@
+\section{Automated Harness Generation}%
+\label{sec:approach}
+
+We present an agent-based approach to automated fuzzing harness generation that addresses several fundamental challenges of generating effective harnesses for complex library APIs. Our approach combines LLM-powered agents with static analysis and dynamic coverage feedback to iteratively construct and refine harnesses that achieve deep code coverage.
+
+\subsection{Core Principles}%
+\label{subsec:core-principles}
+Our approach is guided by three principles that inform the design of our agent-based harness generation system.
+\paragraph{Iterative Contextual Exploration}
+API semantics vary widely across libraries. Initialization sequences, factory patterns, and implicit preconditions resist capture in fixed schemas~\cite{CITE:template-based-test-gen}. Rather than attempting one-shot extraction~\cite{CITE:one-shot-LLM-generation}, we employ agents that maintain full reasoning history and iterate freely, following information dependencies as they emerge. An agent examining a method signature may discover complex parameter types, prompting investigation of factory methods. This iterative exploration accommodates API diversity without exhaustive preprocessing. We instantiate this through ReAct agents~\cite{yao2023react} with modular decomposition preventing context saturation while preserving reasoning continuity.
+
+\paragraph{Query-Driven Information Access}
+The information space surrounding any target method (reachable code, transitive dependencies, documentation) vastly exceeds LLM context windows. Rather than exhaustively preprocessing~\cite{CITE:static-analysis-preprocessing} or using retrieval heuristics~\cite{CITE:RAG-for-code}, we provide agents with query tools that return precisely requested information. Agents construct context based on reasoning needs, maintaining high signal-to-noise ratios. Role-based tool restrictions ensure agents focus on task-pertinent information, preventing exploration drift.
+
+\paragraph{Agent-Guided Refinement Termination}
+Coverage metrics are fundamentally ambiguous. Incomplete coverage may indicate inadequate harnesses, unreachable code, or paths requiring external resources. Rather than applying fixed thresholds~\cite{CITE:coverage-threshold-approaches}, we delegate termination decisions to an agent that interprets coverage gaps by examining uncovered code (control flow, preconditions, reachability) to determine whether gaps are addressable. This interpretation enables early stopping when refinement yields diminishing returns while continuing when concrete improvement strategies exist, avoiding both premature termination and wasteful iteration.
+\input{figures/overview.tex}
+\subsection{Workflow Architecture}%
+\label{subsec:workflow-architecture}
+
+
+Figure~\ref{fig:overview} illustrates our workflow as a sequence of transformations that progressively refine a fuzzing harness. After initializing the environment by downloading library artifacts and preparing analysis infrastructure, the workflow proceeds through three phases. Each phase transforms intermediate artifacts through agent-driven reasoning and automated validation.
+
+\paragraph{Target Research}
+The workflow begins by transforming the target method signature into contextual knowledge about API semantics. A research agent queries documentation and examines source code to understand how the target method should be invoked. Rather than exhaustively extracting all available information, the agent follows its reasoning to identify relevant patterns such as required initialization sequences, factory method usage, or implicit preconditions. The agent produces a natural language research report structured with predefined markdown sections that organize findings without constraining content to rigid schemas, accommodating diverse API designs.
+
+\paragraph{Harness Construction}
+The research report is transformed into executable code through two sequential steps. First, a generation agent synthesizes initial harness code that instantiates the target method with fuzzer-generated inputs. Second, a compilation agent iteratively resolves build errors by analyzing compiler diagnostics and querying additional source code to correct syntactic issues. Once compilation succeeds, the workflow transitions to the coverage analysis phase.
+
+\paragraph{Coverage Analysis and Refinement}
+The compiled harness is executed under fuzzing to collect coverage data. Coverage instrumentation tracks only code executed while the target method is active, ensuring metrics reflect the target's behavior rather than incidental framework initialization. Coverage data merged with static callgraph information becomes the input to an iterative refinement loop. A coverage analysis agent examines which reachable methods remain uncovered, explores their semantics through source code and documentation queries, and determines whether coverage gaps are addressable through harness modifications. If the agent identifies concrete improvement opportunities, a refinement agent modifies the harness to exercise uncovered paths and the workflow returns to compilation and fuzzing. This loop continues until the coverage agent determines refinement yields diminishing returns or an iteration limit is reached.
+\subsection{Static Analysis and Instrumentation}%
+\label{subsec:static-analysis}
+\input{figures/coverage-tracking-sample.tex}
+Our approach requires three preprocessing artifacts that enable efficient agent exploration and accurate coverage measurement: parsed API documentation, static callgraphs, and instrumented coverage collection.
+
+\paragraph{API Documentation Indexing}
+We extract method signatures, parameter types, and semantic descriptions from Javadoc HTML archives distributed with Maven artifacts, parsing them using Beautiful Soup~\cite{beautifulsoup}. This provides agents with concise API contracts, avoiding context pollution from verbose source code when only interface information is needed. Parsed documentation is indexed for tool usage.
+
+\paragraph{Static Callgraph Construction}
+We compute a static callgraph rooted at the target method using SootUp's Class Hierarchy Analysis~\cite{sootup2023}, traversing method invocations to a configurable depth. We use depth~10 by default, reducing to depth~5 for large libraries where deeper analysis becomes computationally prohibitive. Each node records the method's signature, enclosing class, and distance from the target. This callgraph serves two purposes: it scopes coverage analysis to reachable methods, and it provides agents with structural context about the target's call dependencies. For libraries with complex inheritance or external dependencies, we include transitive dependencies in the analysis to ensure accurate call resolution.
+
+\paragraph{Method-Targeted Coverage}
+Standard coverage instrumentation measures all executed code, creating a misaligned incentive for agents to invoke unrelated utility methods. We address this by extending JaCoCo~\cite{jacoco} with lightweight runtime toggling of coverage tracking that is accessible through the runtime API. After successful compilation of the target harness we use ASM~\cite{ASM} to add the required call wrapping using lightweight offline instrumentation. As shown in Listing~\ref{lst:coverage-tracking}, the harness disables coverage recording during initialization (line~3), enables it immediately before invoking the target method (line~9), and disables it again upon return (line~11). This scoping ensures coverage metrics reflect the target's behavior rather than incidental framework code, aligning agent optimization with the goal of exploring the target method's logic.
+%
+%
+\subsection{Tool-Augmented Exploration}%
+\label{subsec:tool-augmented-exploration}
+\input{figures/mcp-design.tex}
+
+The preprocessing artifacts described in Section~\ref{subsec:static-analysis} must be exposed to agents in a form compatible with LLM tool-use protocols. While we provide initial context where immediately relevant (e.g., target method documentation at agent initialization, as detailed in subsequent workflow sections), exhaustively injecting all documentation, source code, and callgraph data would exhaust token budgets. Instead, we implement a query-based interface using the Model Context Protocol (MCP)~\cite{mcp2024}, enabling agents to retrieve additional information on demand as reasoning progresses.
+
+
+\paragraph{Tool Interface Design}
+We expose three tool categories corresponding to the preprocessing artifacts: (1)~\emph{documentation queries} retrieve package, class or method signatures and parameter descriptions from indexed Javadoc, (2)~\emph{source code retrieval} returns method implementations for examining initialization logic or exception handling, and (3)~\emph{callgraph queries} provide reachability information rooted at the target method. Figure~\ref{fig:mcp-design} illustrates the initialization process and interaction with underlying tooling. Each tool accepts structured parameters (e.g., class name, method signature) and returns responses optimized for LLM consumption: concise method signatures, minimal code snippets, and depth-limited callgraph fragments. Figure~\ref{fig:mcp-tool-schema} shows the schema for a source code retrieval tool, demonstrating how parameter descriptions guide agents toward correct tool usage.
+\input{tables/mcp-overview.tex}
+
+\paragraph{Role-Based Tool Access}
+To prevent exploration drift, we restrict tool access based on agent role. Table~\ref{tab:tool-availability} summarizes tool availability across the five ReAct agents in our workflow. All agents access documentation (\textit{Docs}) and source code (\textit{Code}) tools, which provide foundational API understanding throughout the workflow. However, callgraph tools (\textit{CG}) are restricted to the coverage analysis agent, which uses reachability information to interpret coverage gaps during refinement. Execution tools (\textit{Exec}) are invoked statically through state transitions rather than through MCP queries. This access control maintains focus on phase-specific objectives, reducing wasted tool invocations and preventing agents from pursuing information irrelevant to their current task.
+
+\input{figures/mcp-registration.tex}
+%
+\subsection{Target Research}%
+\label{subsec:target-research}
+
+Following environment initialization (Maven download, documentation extraction, callgraph construction), the research agent transforms the target method signature into contextual knowledge about API semantics. The agent is initialized with the target method's signature, documentation, and source code, then iteratively queries additional documentation and source code through MCP tools. Figure~\ref{fig:research-sequence} illustrates this query-driven exploration pattern. Rather than exhaustively extracting all available information, the agent follows its reasoning to identify relevant patterns: required initialization sequences, factory method usage, and implicit preconditions. The agent produces a natural language research report structured with predefined markdown sections that organize findings without constraining content to rigid schemas, accommodating diverse API designs.
+\input{figures/research-sequence.tex}
+\subsection{Harness Generation}%
+\label{subsec:harness-generation}
+
+The research report is transformed into compilable code through two sequential steps: generation and compilation. The generation agent synthesizes initial harness code that instantiates the target method with fuzzer-generated inputs. The agent has access to the Jazzer API documentation and queries additional source code to resolve ambiguities in constructor signatures or factory method usage. The agent outputs harness source code and a list of Maven dependencies. Separating research from generation prevents context saturation: research explores broadly without committing to code structure, while generation focuses narrowly on producing syntactically valid harness code.
+
+If the compile step fails, a compilation agent iteratively resolves build errors by analyzing compiler diagnostics, querying source code and documentation to understand the root cause, and producing corrected code until compilation succeeds or an iteration limit is reached. Common error patterns include missing imports, incorrect method signatures, and improper exception handling. Independent compilation repair allows targeted iteration budgets distinct from initial synthesis, reflecting the need for precise syntactic correctness in the final artifact.
+\subsection{Coverage-Guided Refinement}%
+\label{subsec:coverage-guided-refinement}
+
+Once compilation succeeds, the compiled harness is instrumented and executed under fuzzing to collect initial coverage data. Coverage instrumentation tracks only code executed while the target method is active, ensuring metrics reflect the target's behavior rather than incidental framework initialization. An iterative refinement loop then uses this coverage feedback to improve harness effectiveness through two collaborative agents: a coverage analysis agent that interprets coverage gaps and decides whether refinement is worthwhile, and a refinement agent that modifies the harness.
+
+\paragraph{Coverage Analysis and Termination}
+To seed the coverage analysis, we merge method-level coverage data with the static callgraph to produce an annotated view showing coverage status for each reachable method, grouped by call depth from the target. The coverage analysis agent explores uncovered or partially covered methods by querying their source code and documentation to determine whether gaps reflect addressable harness deficiencies (missing input diversity, unexplored API paths) or fundamental limitations (unreachable defensive code, external I/O dependencies). The agent then makes a termination decision: stop if further refinement yields diminishing returns, or continue with a strategy targeting specific uncovered methods.
+
+\paragraph{Harness Refinement}
+If refinement continues, the refinement agent receives the current harness code, the coverage analysis strategy (priority methods and improvement rationale), and annotated coverage data. The agent modifies the harness to exercise uncovered code paths through strategies such as diversifying input generation, invoking alternative API paths, or triggering exception handlers through edge-case inputs. The refined harness re-enters compilation and fuzzing, creating a feedback loop that continues until the coverage agent determines refinement yields diminishing returns or an iteration limit is reached. Convergence detection through code hashing prevents oscillation between semantically equivalent harness variants.
+\subsection{Implementation}%
+\label{subsec:implementation}
+We implement our approach using LangGraph~\cite{langgraph2024} for workflow orchestration and Claude 4.5 Sonnet as the underlying model. The workflow state machine coordinates agent execution, managing transitions between research, generation, compilation, fuzzing, and refinement phases. Agents interact with preprocessed artifacts (documentation, source code, callgraphs) through a standardized tool protocol, with tool responses cached to avoid redundant queries. Harnesses are compiled using gralde and executed using Jazzer with instrumented coverage collection.
