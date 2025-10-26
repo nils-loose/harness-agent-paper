@@ -9,6 +9,8 @@ We evaluate our harness generation approach on widely used Maven libraries, exam
 We evaluate on seven target methods from six widely-deployed Java libraries (Table~\ref{tab:benchmarks}). The selected targets span parsers (commons-cli, jsoup, antlr4), JSON libraries (gson, jackson-databind), and core utilities (guava).
 All selected target methods have existing harnesses in OSS-Fuzz~\cite{CITE:OSSFuzz}, which serve as our primary baseline. We additionally compare against Jazzer AutoFuzz~\cite{CITE:Jazzer}, which uses Java reflection for automatic harness generation. For LLM-based comparison, we attempted to use OSS-Fuzz-Gen~\cite{CITE:OSSFuzzGen}, but encountered implementation issues, primarily in model output parsing, that prevented successful harness generation for the selected targets Java targets.
 \par
+We implement our approach using LangGraph~\cite{langgraph2024} for workflow orchestration and Claude 4.5 Sonnet (2025-09-29) as the underlying model. Harnesses are compiled using Gradle and executed using Jazzer with instrumented coverage collection. Our implementation and generated harnesses are available on GitHub.\footnote{Repository anonymized for submission.}
+\par
 To measure the effectiveness of fuzzing the targeted method, we measure coverage under two configurations: (1)~method-targeted coverage activates only during target method execution (Section~\ref{subsec:static-analysis}), focusing metrics on target behavior; (2)~full target-scope coverage uses standard JaCoCo instrumentation across the entire library for fair baseline comparison.
 All campaigns are run for 12 hours per target with a single fuzzing thread and an empty seed corpus. 
 \subsection{Coverage Effectiveness}%
