@@ -1,4 +1,4 @@
-\begin{lstlisting}[language=Java,caption={Conceptual decompiled harness showing selective coverage instrumentation through runtime control of JaCoCo's recording state. The coverage handling calls are added using offline instrumentation after compilation.},label={lst:coverage-tracking},float=htbp,basicstyle=\small\ttfamily,numbers=left,numberstyle=\tiny\color{gray},frame=single]
+\begin{lstlisting}[float=t,language=Java,caption={Conceptual decompiled harness showing selective coverage instrumentation through runtime control of JaCoCo's recording state. The coverage handling calls are added using offline instrumentation after compilation.},label={lst:coverage-tracking},float=htbp,basicstyle=\small\ttfamily,numbers=left,numberstyle=\tiny\color{gray},frame=single]
 public static void fuzzerTestOneInput(
       FuzzedDataProvider data) {
    RT.getAgent().setRecording(false);

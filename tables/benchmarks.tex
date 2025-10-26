@@ -1,0 +1,28 @@
+\begin{table*}[t]
+\caption{Benchmark library characteristics. All libraries are widely-deployed in the Maven ecosystem and represent real-world fuzzing targets.}
+\centering
+\setlength{\tabcolsep}{3pt}
+\renewcommand{\arraystretch}{1.1}
+\small
+\begin{tabular}{l r r l l l r}
+\toprule
+\textbf{Library} & \textbf{Version} & \textbf{Dependents} & \textbf{Class Name} & \textbf{Target Method} & \textbf{Category} & \textbf{Rank} \\
+\midrule
+commons-cli      & 1.10.0     & 5K+  & DefaultParser        & parse(Options, String[])              & CLI Parser       & \#1 \\
+gson             & 2.13.1     & 27K+ & JsonParser           & parseString(String)                   & JSON Library     & \#2 \\
+guava            & 33.4.8-jre & 42K+ & HostAndPort          & fromString(String)                    & Core Utilities   & \#1 \\
+jackson-databind & 2.20.0     & 36K+ & ObjectMapper         & readTree(String)                      & JSON Library     & \#1 \\
+jsoup            & 1.21.1     & 4K+  & Jsoup                & parse(String)                         & HTML Parser      & \#1 \\
+\midrule
+\multirow{2}{*}{antlr4} & \multirow{2}{*}{4.13.2} & \multirow{2}{*}{1K+} & Grammar & Grammar(String) & \multirow{2}{*}{Parser Generator} & \multirow{2}{*}{\#1} \\[-.9pt]
+                &            &      & Grammar              & createParserInterpreter(TokenStream)  &                  &      \\
+\bottomrule
+\end{tabular}
+\smallskip
+\begin{flushleft}
+\footnotesize
+Dependents = Maven artifacts declaring this library as a dependency. Rank = Category ranking on Maven Central.
+\end{flushleft}
+\vspace{-3mm}
+\label{tab:benchmarks}
+\end{table*}

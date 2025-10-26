@@ -1,0 +1,392 @@
+[
+  {
+    "target": "antlr4::Grammar_Grammar(String)",
+    "library": "antlr4",
+    "method": "Grammar_Grammar(String)",
+    "cost": 3.34,
+    "time": 636,
+    "tokens": 1018251,
+    "workflow_iterations": 2,
+    "refinement_rounds": 1,
+    "agents": {
+      "RES": [
+        [
+          19,
+          23
+        ]
+      ],
+      "GEN": [
+        [
+          4,
+          4
+        ]
+      ],
+      "PAT": [
+        [
+          0,
+          0
+        ],
+        [
+          1,
+          0
+        ]
+      ],
+      "CVA": [
+        [
+          6,
+          12
+        ],
+        [
+          10,
+          16
+        ]
+      ],
+      "REF": [
+        [
+          7,
+          16
+        ]
+      ]
+    }
+  },
+  {
+    "target": "antlr4::Grammar_createParserInterpreter(TokenStream)",
+    "library": "antlr4",
+    "method": "Grammar_createParserInterpreter(TokenStream)",
+    "cost": 2.21,
+    "time": 370,
+    "tokens": 688252,
+    "workflow_iterations": 1,
+    "refinement_rounds": 0,
+    "agents": {
+      "RES": [
+        [
+          19,
+          46
+        ]
+      ],
+      "GEN": [
+        [
+          3,
+          4
+        ]
+      ],
+      "PAT": [
+        [
+          0,
+          0
+        ]
+      ],
+      "CVA": [
+        [
+          13,
+          12
+        ]
+      ],
+      "REF": []
+    }
+  },
+  {
+    "target": "commons-cli::DefaultParser_parse(Options, String[])",
+    "library": "commons-cli",
+    "method": "DefaultParser_parse(Options, String[])",
+    "cost": 6.25,
+    "time": 1200,
+    "tokens": 1895668,
+    "workflow_iterations": 4,
+    "refinement_rounds": 3,
+    "agents": {
+      "RES": [
+        [
+          17,
+          44
+        ]
+      ],
+      "GEN": [
+        [
+          3,
+          5
+        ]
+      ],
+      "PAT": [
+        [
+          5,
+          11
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ],
+      "CVA": [
+        [
+          16,
+          28
+        ],
+        [
+          14,
+          22
+        ],
+        [
+          13,
+          16
+        ],
+        [
+          14,
+          28
+        ]
+      ],
+      "REF": [
+        [
+          10,
+          19
+        ],
+        [
+          7,
+          15
+        ],
+        [
+          15,
+          23
+        ]
+      ]
+    }
+  },
+  {
+    "target": "gson::JsonParser_parseString(String)",
+    "library": "gson",
+    "method": "JsonParser_parseString(String)",
+    "cost": 1.81,
+    "time": 337,
+    "tokens": 556710,
+    "workflow_iterations": 1,
+    "refinement_rounds": 0,
+    "agents": {
+      "RES": [
+        [
+          17,
+          27
+        ]
+      ],
+      "GEN": [
+        [
+          2,
+          2
+        ]
+      ],
+      "PAT": [
+        [
+          0,
+          0
+        ]
+      ],
+      "CVA": [
+        [
+          17,
+          31
+        ]
+      ],
+      "REF": []
+    }
+  },
+  {
+    "target": "guava::HostAndPort_fromString(String)",
+    "library": "guava",
+    "method": "HostAndPort_fromString(String)",
+    "cost": 1.34,
+    "time": 417,
+    "tokens": 394503,
+    "workflow_iterations": 2,
+    "refinement_rounds": 1,
+    "agents": {
+      "RES": [
+        [
+          16,
+          23
+        ]
+      ],
+      "GEN": [
+        [
+          3,
+          2
+        ]
+      ],
+      "PAT": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ],
+      "CVA": [
+        [
+          4,
+          4
+        ],
+        [
+          4,
+          5
+        ]
+      ],
+      "REF": [
+        [
+          5,
+          5
+        ]
+      ]
+    }
+  },
+  {
+    "target": "jackson-databind::ObjectMapper_readTree(String)",
+    "library": "jackson-databind",
+    "method": "ObjectMapper_readTree(String)",
+    "cost": 4.13,
+    "time": 684,
+    "tokens": 1285266,
+    "workflow_iterations": 2,
+    "refinement_rounds": 1,
+    "agents": {
+      "RES": [
+        [
+          17,
+          24
+        ]
+      ],
+      "GEN": [
+        [
+          3,
+          3
+        ]
+      ],
+      "PAT": [
+        [
+          6,
+          6
+        ],
+        [
+          0,
+          0
+        ]
+      ],
+      "CVA": [
+        [
+          18,
+          21
+        ],
+        [
+          14,
+          16
+        ]
+      ],
+      "REF": [
+        [
+          8,
+          13
+        ]
+      ]
+    }
+  },
+  {
+    "target": "jsoup::Jsoup_parse(String)",
+    "library": "jsoup",
+    "method": "Jsoup_parse(String)",
+    "cost": 3.32,
+    "time": 551,
+    "tokens": 1038638,
+    "workflow_iterations": 2,
+    "refinement_rounds": 1,
+    "agents": {
+      "RES": [
+        [
+          19,
+          28
+        ]
+      ],
+      "GEN": [
+        [
+          4,
+          4
+        ]
+      ],
+      "PAT": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ],
+      "CVA": [
+        [
+          14,
+          24
+        ],
+        [
+          18,
+          21
+        ]
+      ],
+      "REF": [
+        [
+          10,
+          22
+        ]
+      ]
+    }
+  },
+  {
+    "target": "AVERAGE",
+    "library": "",
+    "method": "",
+    "cost": 3.1999999999999997,
+    "time": 599.2857142857143,
+    "tokens": 982469.7142857143,
+    "workflow_iterations": 2.0,
+    "refinement_rounds": 1.0,
+    "agents": {
+      "RES": [
+        [
+          17.714285714285715,
+          30.714285714285715
+        ]
+      ],
+      "GEN": [
+        [
+          3.142857142857143,
+          3.4285714285714284
+        ]
+      ],
+      "PAT": [
+        [
+          0.8571428571428571,
+          1.2142857142857142
+        ]
+      ],
+      "CVA": [
+        [
+          12.5,
+          18.285714285714285
+        ]
+      ],
+      "REF": [
+        [
+          8.857142857142858,
+          16.142857142857142
+        ]
+      ]
+    }
+  }
+]

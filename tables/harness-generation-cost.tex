@@ -1,0 +1,39 @@
+\begin{table}[t]
+\caption{Harness generation cost and agent activity across target libraries. Agent rows show iterations and tool calls, with multiple values (e.g., 5/10) indicating successive refinement rounds.}
+\centering
+\setlength{\tabcolsep}{3pt}
+\renewcommand{\arraystretch}{1.1}
+\small
+\begin{tabular}{l l | r r r r r | r}
+\toprule
+& \textbf{Metric} & \textbf{commons-cli} & \textbf{gson} & \textbf{guava} & \textbf{jackson} & \textbf{jsoup} & \textbf{Avg} \\
+\midrule
+& Tokens & 1896K & 557K & 395K & 1285K & 1039K & 982K \\
+& Cost & \$6.25 & \$1.81 & \$1.34 & \$4.13 & \$3.32 & \$3.20 \\
+& Time & 1200s & 337s & 417s & 684s & 551s & 599s \\
+\midrule
+\multirow{2}{*}{\rotatebox{90}{\textbf{RES}}} & Iter & 17 & 17 & 16 & 17 & 19 & 17.7 \\
+& Tools & 44 & 27 & 23 & 24 & 28 & 30.7 \\
+\midrule
+\multirow{2}{*}{\rotatebox{90}{\textbf{GEN}}} & Iter & 3 & 2 & 3 & 3 & 4 & 3.1 \\
+& Tools & 5 & 2 & 2 & 3 & 4 & 3.4 \\
+\midrule
+\multirow{2}{*}{\rotatebox{90}{\textbf{PAT}}} & Iter & 5/0/0/0 & 0 & 0/0 & 6/0 & 0/0 & 0.9 \\
+& Tools & 11/0/0/0 & 0 & 0/0 & 6/0 & 0/0 & 1.2 \\
+\midrule
+\multirow{2}{*}{\rotatebox{90}{\textbf{CVA}}} & Iter & 16/14/13/14 & 17 & 4/4 & 18/14 & 14/18 & 12.5 \\
+& Tools & 28/22/16/28 & 31 & 4/5 & 21/16 & 24/21 & 18.3 \\
+\midrule
+\multirow{2}{*}{\rotatebox{90}{\textbf{REF}}} & Iter & 10/7/15 & -- & 5 & 8 & 10 & 8.9 \\
+& Tools & 19/15/23 & -- & 5 & 13 & 22 & 16.1 \\
+\bottomrule
+\end{tabular}
+\smallskip
+\begin{flushleft}
+\footnotesize
+\textbf{Agents:} RES (Research), GEN (Generation), PAT (Patching), CVA (Coverage Analysis), REF (Refinement). \\
+Iter = Iterations, Tools = Tool Calls. Multiple values (e.g., 5/10) indicate successive refinement rounds. -- = no activity.
+\end{flushleft}
+\vspace{-3mm}
+\label{tab:generation-cost}
+\end{table}

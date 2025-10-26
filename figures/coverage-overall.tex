@@ -1,13 +1,30 @@
 \begin{figure*}[t]
     \centering
+    % Row 1: Method-Targeted Coverage (Ours only)
+    \textbf{Method-Targeted Coverage (Ours)}\\[4pt]
     \begin{tabular}{ccccc}
-        \includesvg[width=0.18\textwidth]{data/coverage/commons-cli-1.10.0_coverage_comparison.svg} &
-        \includesvg[width=0.18\textwidth]{data/coverage/gson-2.13.1_coverage_comparison.svg} &
-        \includesvg[width=0.18\textwidth]{data/coverage/guava-33.4.8-jre_coverage_comparison.svg} &
-        \includesvg[width=0.18\textwidth]{data/coverage/jackson-databind-2.19.0_coverage_comparison.svg} &
-        \includesvg[width=0.18\textwidth]{data/coverage/jsoup-1.21.1_coverage_comparison.svg} \\
-        (a) commons-cli & (b) gson & (c) guava & (d) jackson-databind & (e) jsoup
+        \includesvg[width=0.18\textwidth]{data/coverage/commons_coverage_comparison.svg} &
+        \includesvg[width=0.18\textwidth]{data/coverage/gson_coverage_comparison.svg} &
+        \includesvg[width=0.18\textwidth]{data/coverage/guava_coverage_comparison.svg} &
+        \includesvg[width=0.18\textwidth]{data/coverage/jackson_coverage_comparison.svg} &
+        \includesvg[width=0.18\textwidth]{data/coverage/jsoup_coverage_comparison.svg} \\
+        commons-cli & gson & guava & jackson-databind & jsoup
     \end{tabular}
-    \caption{Coverage comparison across five Java libraries over fuzzing time. Each subplot shows the branch coverage achieved by different harness generation approaches.}
+
+    \vspace{12pt}
+
+    % Row 2: Full Target-Scope Coverage (Ours vs AutoFuzz)
+    % TODO: Replace with actual full-scope comparison plots once AutoFuzz runs complete
+    \textbf{Full Target-Scope Coverage (Baseline Comparison)}\\[4pt]
+    \begin{tabular}{ccccc}
+        \includesvg[width=0.18\textwidth]{data/coverage/commons_coverage_comparison.svg} &
+        \includesvg[width=0.18\textwidth]{data/coverage/gson_coverage_comparison.svg} &
+        \includesvg[width=0.18\textwidth]{data/coverage/guava_coverage_comparison.svg} &
+        \includesvg[width=0.18\textwidth]{data/coverage/jackson_coverage_comparison.svg} &
+        \includesvg[width=0.18\textwidth]{data/coverage/jsoup_coverage_comparison.svg} \\
+        commons-cli & gson & guava & jackson-databind & jsoup
+    \end{tabular}
+
+    \caption{Coverage comparison across five Java libraries over 12-hour fuzzing campaigns. \textbf{Top row:} Method-targeted coverage for our generated harnesses, focusing exclusively on target method execution. \textbf{Bottom row:} Full target-scope coverage enabling fair comparison with AutoFuzz baseline. Each plot shows branch coverage percentage over time.}
     \label{fig:coverage-comparison}
 \end{figure*}

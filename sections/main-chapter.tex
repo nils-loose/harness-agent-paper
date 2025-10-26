@@ -1,8 +1,7 @@
 \section{Automated Harness Generation}%
 \label{sec:approach}
-
 We present an agent-based approach to automated fuzzing harness generation that addresses several fundamental challenges of generating effective harnesses for complex library APIs. Our approach combines LLM-powered agents with static analysis and dynamic coverage feedback to iteratively construct and refine harnesses that achieve deep code coverage.
-
+%
 \subsection{Core Principles}%
 \label{subsec:core-principles}
 Our approach is guided by three principles that inform the design of our agent-based harness generation system.
@@ -14,7 +13,7 @@ The information space surrounding any target method (reachable code, transitive 
 
 \paragraph{Agent-Guided Refinement Termination}
 Coverage metrics are fundamentally ambiguous. Incomplete coverage may indicate inadequate harnesses, unreachable code, or paths requiring external resources. Rather than applying fixed thresholds~\cite{CITE:coverage-threshold-approaches}, we delegate termination decisions to an agent that interprets coverage gaps by examining uncovered code (control flow, preconditions, reachability) to determine whether gaps are addressable. This interpretation enables early stopping when refinement yields diminishing returns while continuing when concrete improvement strategies exist, avoiding both premature termination and wasteful iteration.
-\input{figures/overview.tex}
+
 \subsection{Workflow Architecture}%
 \label{subsec:workflow-architecture}
 

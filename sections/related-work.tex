@@ -1,0 +1,39 @@
+\section{Related Work}
+\label{sec:related-work}
+
+This section reviews existing approaches to automated harness generation, positioning our work within the broader research landscape through a comprehensive survey of classical and modern techniques.
+
+\subsection{Classical Approaches to Harness Generation}
+\label{subsec:classical-harness-generation}
+
+
+
+Different traditions of program analysis have shaped how fuzzing harnesses are constructed. A first line of work can be described as \textbf{(1) usage-based generation}, where valid API calls are mined from existing consumer code or unit tests and then repurposed to build drivers. This strategy captures realistic interaction patterns between libraries and clients, as demonstrated by systems that slice client code into reusable API snippets~\cite{DBLP:conf/sigsoft/BabicBCIKKLSW19:FUDGE}, construct harness stubs from API dependence graphs extracted from consumer projects~\cite{DBLP:conf/uss/IspoglouAMP20:FuzzGen}, inject fuzzed inputs into test cases while preserving their order~\cite{DBLP:conf/sp/JeongJYMKJKSH23:UTopia}, or aggregate traces and snippets from package repositories~\cite{DBLP:journals/pacmse/WuNH25:WildSync, DBLP:conf/icse/ZhangZLWLZJ23:Daisy}.
+
+In contrast, \textbf{(2) structure- or API-based generation} avoids reliance on external code and derives harnesses directly from type signatures, header files, or interface specifications. Approaches in this category focus on risky functions such as dereferences~\cite{DBLP:conf/icse:ZhangLMZ021:IntelliGen}, build dataflow graphs to capture API interactions~\cite{DBLP:conf/icse/GreenA22:GraphFuzz}, adapt this principle to specific domains such as OEM Android components and JNI bindings~\cite{DBLP:conf/ccs/ChenXLWC23:Hopper, DBLP:conf/uss/IspoglouAMP20:FuzzGen, DBLP:conf/issta/XiongDCQWSZ24:Atlas}, or introduce intermediate representations, API-flow clustering, and constraint learning to enable application to large-scale or closed-source libraries~\cite{DBLP:journals/pacmse/ToffaliniBTP25:LibErator, DBLP:conf/icse/ShermanN25:OGHarn, DBLP:conf/ndss/0007ZLSZLQ25:NEXZZER}.
+
+Finally, there is \textbf{(3) evolutionary or feedback-driven generation}, where harnesses are refined iteratively based on runtime signals such as coverage or oracle checks. This approach uses automaton learning on API usage patterns~\cite{DBLP:conf/uss/ZhangLZZZZXLL0H23:Rubick}, ranks and selects candidate harnesses after short fuzzing trials~\cite{DBLP:journals/pacmse/ToffaliniBTP25:LibErator}, filters out misuses through relation learning~\cite{DBLP:conf/ndss/0007ZLSZLQ25:NEXZZER}, or validates candidates using compile-time and runtime oracles~\cite{DBLP:conf/icse/ShermanN25:OGHarn}. These systems demonstrate how feedback loops can drive continuous improvement, in contrast to static one-shot generation.
+
+\subsection{LLM-based Approaches}
+\label{subsec:llm-approaches}
+
+
+With the availability of large language models, harness generation has also been explored from a learning perspective. One stream of work takes the form of \textbf{(1) feasibility studies}, which probe the capabilities and limitations of LLMs in fuzzing. These studies evaluate different prompting strategies across benchmarks~\cite{DBLP:conf/issta/ZhangZBLMXLSL24:HowEffectiveAreThey} and discuss fundamental obstacles such as semantic drift and the absence of reliable oracles~\cite{DBLP:conf/sigsoft/Jiang0MCZSWFWLZ24:WhenFuzzingMeetsLLMs}.
+
+Beyond these exploratory efforts, a growing body of research investigates \textbf{(2) automatic harness synthesis with LLMs}. Systems in this category introduce coverage-guided prompt mutation for iterative refinement~\cite{DBLP:conf/ccs/LyuXCC24:PromptFuzz}, augment LLM reasoning with knowledge graphs of API relations~\cite{DBLP:conf/icse/XuMZZCHLW25:CKGFuzzer}, address binary-only interfaces with agent-based synthesis~\cite{DBLP:journals/corr/abs-2507-15058:LibLMFuzz}, target unsafe Rust APIs~\cite{DBLP:journals/corr/abs-2506-15648:deepSURF}, integrate CVE metadata to guide call-chain harnesses~\cite{DBLP:journals/corr/abs-2505-03425:HGFuzzer}, or employ constraint dependency graphs for Python libraries~\cite{DBLP:journals/cybersec/LiuLZZLL25:LLM4TDG}.
+
+A particularly promising movement is \textbf{(3) hybrid and multi-agent architectures}, where LLMs are embedded into broader analytic ecosystems. Approaches in this category orchestrate several agents around a knowledge graph~\cite{DBLP:conf/icse/XuMZZCHLW25:CKGFuzzer}, combine LLM-based repair with solver-driven scheduling~\cite{DBLP:journals/corr/abs-2507-18289:Scheduzz}, or integrate LLM reasoning into static analysis pipelines built on CodeQL and Tree-Sitter~\cite{DBLP:journals/corr/abs-2505-03425:HGFuzzer}. These works illustrate the potential of combining generative capabilities with structured analysis and feedback mechanisms.
+
+\subsection{Research Gaps}
+\label{subsec:research-gaps}
+
+Taken together, the literature reveals clear strengths and weaknesses across approaches. In the classical camp, \textbf{(1) usage-based methods} excel at extracting realistic API sequences but remain dependent on the availability of suitable consumer code~\cite{DBLP:conf/sigsoft/BabicBCIKKLSW19:FUDGE, DBLP:conf/uss/IspoglouAMP20:FuzzGen, DBLP:conf/sp/JeongJYMKJKSH23:UTopia}. Meanwhile, \textbf{(2) structure- or API-based methods} offer broader applicability but often lack iterative refinement, leaving adaptation to new environments largely manual~\cite{DBLP:conf/icse/GreenA22:GraphFuzz, DBLP:conf/ccs/ChenXLWC23:Hopper, DBLP:conf/ndss/0007ZLSZLQ25:NEXZZER}. Even \textbf{(3) feedback-driven systems} show promise yet frequently rely on domain-specific heuristics or narrow evaluation loops~\cite{DBLP:conf/uss/ZhangLZZZZXLL0H23:Rubick, DBLP:conf/icse/ShermanN25:OGHarn}.
+
+LLM-based approaches display complementary gaps. While \textbf{(1) feasibility studies} clarify potential, they stop short of operational workflows~\cite{DBLP:conf/issta/ZhangZBLMXLSL24:HowEffectiveAreThey, DBLP:conf/sigsoft/Jiang0MCZSWFWLZ24:WhenFuzzingMeetsLLMs}. Systems for \textbf{(2) automatic synthesis} demonstrate strong results but tend to remain domain-bound~\cite{DBLP:conf/ccs/LyuXCC24:PromptFuzz, DBLP:journals/corr/abs-2507-15058:LibLMFuzz, DBLP:journals/corr/abs-2506-15648:deepSURF, DBLP:journals/cybersec/LiuLZZLL25:LLM4TDG}. And although \textbf{(3) hybrid and multi-agent solutions} represent an important step forward, very few manage to integrate generation, repair, fuzzing, and optimization into a fully automated feedback loop~\cite{DBLP:conf/icse/XuMZZCHLW25:CKGFuzzer, DBLP:journals/corr/abs-2507-18289:Scheduzz, DBLP:journals/corr/abs-2505-03425:HGFuzzer}.
+
+Our work addresses this gap by presenting a multi-agent system tailored for Java libraries, where harnesses are generated, repaired, and improved iteratively under explicit coverage guidance. By providing an end-to-end pipeline—from Maven dependency resolution to fuzzing and coverage analysis—it unites structural analysis with adaptive learning and demonstrates significant improvements in achieved coverage compared to both manual and generic baselines.
+\begin{itemize}
+    \item We build on the strengths of structure-based generation to ensure broad applicability across Java libraries, while avoiding dependence on external code.
+    \item We integrate LLM-based synthesis with static analysis and feedback-driven refinement, creating a closed-loop system that continuously improves harness quality.
+    \item We demonstrate the effectiveness of our approach through extensive evaluation on real-world Java libraries, showing substantial coverage gains over existing methods.
+\end{itemize}

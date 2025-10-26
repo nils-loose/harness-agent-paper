@@ -1,0 +1,25 @@
+\subsection{Threats to Validity}%
+\label{subsec:threats}
+
+\paragraph{Internal Validity}
+LLM non-determinism poses challenges despite temperature=0 configuration, as Claude may produce varying outputs across runs. We mitigate this through convergence detection via code hashing and iteration limits, but different agent trajectories could yield different final harnesses with potentially different coverage profiles.
+
+Callgraph depth configuration affects reachability analysis: we use depth-10 by default (depth-5 for large libraries like guava). Shallower depths may miss reachable methods, while deeper analysis increases agent context size and token costs. Our choice balances completeness against practical constraints.
+
+Coverage sampling at 60-second intervals provides sufficient granularity for 12-hour campaigns, though higher-frequency sampling might reveal transient coverage dynamics. Branch coverage typically exhibits monotonic growth, limiting concerns about missed coverage spikes.
+
+\paragraph{External Validity}
+Our benchmark suite covers 7 methods across 5-6 libraries, representing diverse API patterns (parsers, serializers, utilities, generators). While these targets span common library categories, larger-scale evaluation across hundreds of targets would strengthen generalization claims about agent behavior and success rates.
+
+The approach specifically targets JVM libraries with Maven dependency management and Javadoc documentation. Adaptation to other ecosystems (Python with pip, Rust with cargo, Go modules) requires porting static analysis tooling, documentation parsers, and build system integration. The core multi-agent architecture and MCP-based tool access should transfer, but ecosystem-specific implementation represents non-trivial engineering effort.
+
+We exclusively use Claude 4.5 Sonnet as the underlying model. Different LLMs (GPT-4, Llama 3, Gemini) exhibit different code synthesis capabilities, reasoning patterns, and cost profiles. Future work should validate that our agent architecture and prompt design generalize across model families.
+
+Computational constraints limited us to single 12-hour fuzzing runs per configuration. Multiple runs with different random seeds and statistical testing (e.g., Mann-Whitney U test) would provide stronger confidence in coverage comparisons and better characterize variance in fuzzing outcomes.
+
+\paragraph{Construct Validity}
+Branch coverage serves as a proxy for harness quality but doesn't guarantee bug-finding capability. A harness achieving 90\% coverage may still miss critical edge cases triggering vulnerabilities, while a 60\% coverage harness might trigger specific bugs through focused input patterns. We use coverage as a standardized metric enabling comparison across approaches, acknowledging its limitations.
+
+Method-targeted coverage instrumentation improves alignment with target-specific fuzzing goals but may undercount relevant coverage in utility methods or deeply nested call chains invoked by the target. This trade-off prioritizes focused metrics over comprehensive library coverage.
+
+Cost measurements include only LLM API charges (tokens × price per token) but exclude infrastructure costs: callgraph construction, documentation parsing, and build environment preparation. Total deployment cost in production would be higher, though these fixed costs amortize across multiple targets within the same library ecosystem.

@@ -1,8 +1,9 @@
 \begin{table}[t]
 \caption{Tool availability across DRAG workflow agents. MCP tools are provided by three Model Context Protocol servers that enable LLM agents to query code intelligence APIs.}
 \centering
-\setlength{\tabcolsep}{4pt}
+\setlength{\tabcolsep}{3pt}
 \renewcommand{\arraystretch}{1.1}
+\small
 \begin{tabular}{c l | c c c c c}
 \toprule
 & \multirow{2}{*}{\textbf{Tool}} & \multicolumn{5}{c}{\textbf{ReAct Agents}} \\
@@ -18,8 +19,9 @@
 & \texttt{list\_methods} & \cmark & \cmark & \cmark & \cmark & \cmark \\
 \midrule
 \multirow{5}{*}{\rotatebox{90}{\textit{Code}}}
-& \texttt{get\_code} & \cmark & \cmark & \cmark & \cmark & \cmark \\
-& \texttt{find\_def} & \cmark & \cmark & \cmark & \cmark & \cmark \\
+& \texttt{get\_method\_code} & \cmark & \cmark & \cmark & \cmark & \cmark \\
+& \texttt{get\_class\_code} & \cmark & \cmark & \cmark & \cmark & \cmark \\
+& \texttt{find\_definition} & \cmark & \cmark & \cmark & \cmark & \cmark \\
 & \texttt{find\_refs} & \cmark & \cmark & \cmark & \cmark & \cmark \\
 & \texttt{grep} & \cmark & \cmark & \cmark & \cmark & \cmark \\
 & \texttt{find\_symbol} & \cmark & \cmark & \cmark & \cmark & \cmark \\
