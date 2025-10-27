@@ -18,9 +18,9 @@ All campaigns are run for 12 hours per target with a single fuzzing thread and a
 
 \input{figures/coverage-overall.tex}
 
-Figure~\ref{fig:coverage-comparison} shows line coverage over time across five Java libraries. The top row compares method-targeted coverage for our generated harnesses against the OSS-Fuzz baseline, demonstrating focused execution of target method logic. The bottom row shows full target-scope coverage comparing our approach against AutoFuzz.
-% TODO After plots are finished
-The generated harnesses match or outperform coverage across all evaluated targets. Under full target-scope instrumentation, our harnesses reach [TODO: X\%] average coverage compared to AutoFuzz's [TODO: Y\%], representing a [TODO: Z\%] relative improvement.
+Figure~\ref{fig:coverage-comparison} shows line coverage over time across five Java libraries. The top row compares method-targeted coverage for our generated harnesses against the OSS-Fuzz baseline, evaluating focused execution of target method logic. The bottom row shows full package-scope coverage allowing comparison against AutoFuzz.
+Under method-targeted coverage the generated harnesses have a median improvement of $26$\% over the OSS-Fuzz harnesses, demonstrating the effectiveness of system in generating harnesses for specific methods. The temporal dynamics reveal that the primary difference is observable early into the fuzzing campaign, suggesting that the harness provides better structural input diversity.
+Comparing under full target-scope coverage, our generated harnesses outperform the AutoFuzz and OSS-Fuzz baseline by a median of $5$\% and $6$\% respectively. The only target the generated harness does not outperform the baselines is jackson-databind, where for the OSS-Fuzz harness the harness contains additional fuzzing logic after the execution of the target method increasing the overall coverage. 
 %
 %\paragraph{Coverage Trajectory Analysis}
 %Beyond final coverage values, the temporal dynamics reveal important differences in how harnesses explore target code. Our harnesses typically reach 80\% of their final coverage within the first hour, indicating effective initial synthesis that exercises core API paths immediately. In contrast, AutoFuzz exhibits slower convergence, often requiring 2-3 hours to plateau. This suggests that reflection-based type instantiation discovers shallow API interactions quickly but struggles to synthesize complex call sequences required for deeper coverage.
