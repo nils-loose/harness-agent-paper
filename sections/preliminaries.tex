@@ -1,40 +1,26 @@
 
 \section{Preliminaries}
 
-This section establishes the technical foundation for our approach, introducing coverage-guided fuzzing for managed runtimes, the role of large language models in code synthesis, and relevant baseline systems.
+This section establishes the technical foundation for our approach, introducing harness design challenges, fuzzing infrastructure for the JVM, and agent-based LLM architectures.
 
-\subsection{Coverage-Guided Fuzzing and Harness Design}
+\subsection{Harness Design for Coverage-Guided Fuzzing}
 \label{sec:prelim:fuzzing}
-
-Coverage-guided fuzzing operates by repeatedly executing a program with generated inputs while monitoring code coverage feedback. Each execution provides feedback, typically in the form of newly covered branches or basic blocks, that guides subsequent input mutations toward unexplored program regions. This feedback loop enables fuzzers to systematically navigate complex input spaces and discover deep bugs that evade random testing.
 
 Applying coverage-guided fuzzing to library code introduces a fundamental challenge: libraries expose APIs rather than standalone executables, requiring a \emph{fuzz harness} to mediate between the fuzzer and the target. A harness transforms unstructured byte streams from the fuzzer into valid API invocations by: (1)~parsing fuzz input into structured data types, (2)~constructing necessary object state and satisfying initialization preconditions, (3)~invoking target methods with derived arguments, and (4)~handling or observing exceptions and abnormal termination. The quality of this translation directly determines fuzzing effectiveness: shallow harnesses that merely parse inputs yield limited coverage, while well-designed harnesses that exercise complex API interactions expose deeper program logic and uncover latent bugs.
 
-\subsection{Jazzer: Coverage-Guided Fuzzing for the JVM}
+\subsection{Jazzer and Baseline Systems}
 \label{sec:prelim:jazzer}
 
-Jazzer~\cite{CITE:Jazzer} brings coverage-guided fuzzing to the Java Virtual Machine through a hybrid architecture combining native code instrumentation with JVM bytecode manipulation. The fuzzer executes as a native process that invokes Java methods via JNI, while a Java agent instruments target bytecode at class-load time to collect coverage feedback. This design enables efficient in-process fuzzing with fine-grained branch coverage, comparable to AFL and libFuzzer for native code.
+Jazzer~\cite{CITE:Jazzer} is a coverage-guided fuzzer for the Java Virtual Machine that enables in-process fuzzing with fine-grained branch coverage feedback. Jazzer harnesses implement a standard interface for consuming fuzzer-generated primitives (integers, strings, booleans) to construct valid inputs and orchestrate API calls. While manual harness creation remains common practice, Jazzer includes an AutoFuzz mode that leverages Java reflection to automatically generate harnesses by discovering accessible constructors and methods, recursively building required objects through structure-aware instantiation.
 
-Jazzer harnesses implement a standard interface that provides methods for consuming integers, strings, booleans, and other primitive types. Harness authors use this interface to construct valid inputs and orchestrate API calls. While manual harness creation remains common practice, Jazzer includes an AutoFuzz mode that leverages Java reflection to automatically generate harnesses. AutoFuzz discovers accessible constructors and methods, recursively building required objects and mapping fuzzer bytes to parameter types. 
+OSS-Fuzz~\cite{CITE:OSSFuzz} is Google's continuous fuzzing service for open source software, launched in 2016 to provide free, large-scale fuzzing infrastructure. As of 2025, OSS-Fuzz has helped identify over 13,000 vulnerabilities across 1,000+ projects. All target methods in our evaluation have existing manually-written harnesses in OSS-Fuzz, providing a strong baseline for comparison.
 
-
-\subsection{Large Language Models for Code Synthesis}
+\subsection{Multi-Agent LLM Architectures}
 \label{sec:prelim:llm}
-
-Large Language Models (LLMs) are transformer-based neural architectures trained on massive corpora of source code and natural language to predict and generate token sequences. Through next-token prediction over billions of parameters, LLMs internalize syntactic patterns, API usage idioms, and semantic relationships between code elements. When conditioned on appropriate context—such as function signatures, documentation, or partial implementations—LLMs can synthesize plausible code completions, generate test cases, or repair buggy programs~\cite{CITE:Codex,CITE:AlphaCode}.
 
 Recent work has demonstrated that LLMs can be organized into multi-agent systems where distinct instances specialize in complementary subtasks~\cite{CITE:MultiAgentCode}. Rather than relying on a single monolithic prompt, multi-agent architectures decompose complex objectives into stages handled by specialized agents that communicate through structured message passing or shared state. For code generation tasks, this decomposition enables separation of concerns: one agent explores API documentation and infers usage patterns, another synthesizes implementations, while a third diagnoses compilation errors and proposes fixes. This division of labor mirrors human collaborative workflows and has been shown to improve both generation quality and success rates on challenging benchmarks~\cite{CITE:AgentBench}.
 
-\subsection{Tool-Augmented LLM Reasoning}
+\subsection{Tool-Augmented Reasoning}
 \label{sec:prelim:tools}
 
-While LLMs demonstrate impressive code understanding from pre-training, their knowledge is static and limited to patterns observed in training data. \emph{Tool-augmented reasoning} addresses this limitation by equipping LLMs with external capabilities they can invoke during generation~\cite{DBLP:conf/nips/SchickDSHWSCSW23:Toolformer,CITE:ToolLLM}. For code synthesis tasks, relevant tools include compilers (to validate syntax), test executors (to verify functional correctness), static analyzers (to extract API signatures), and documentation retrievers (to ground generation in current libraries).
-
-The ReAct (Reasoning and Acting) paradigm~\cite{DBLP:conf/iclr/YaoZYDN023:ReAct} formalizes tool use as an interleaved process: the model alternates between reasoning steps (generating natural language explanations of its strategy) and action steps (invoking tools and observing outputs). This loop continues until the model determines it has sufficient information to complete the task. ReAct-style agents have demonstrated substantial improvements over direct prompting on tasks requiring information retrieval, calculation, or interaction with external systems.
-
-\subsection{Baseline: OSS-Fuzz-Gen}
-\label{sec:prelim:ossfuzzgen}
-
-OSS-Fuzz-Gen~\cite{CITE:OSSFuzzGen} represents the current state-of-the-art in LLM-driven harness generation. It combines lightweight static analysis with iterative LLM prompting to synthesize harnesses for libraries integrated into Google's OSS-Fuzz continuous fuzzing service. The system operates in three phases: (1)~static analysis extracts function signatures and type information, (2)~an LLM generates candidate harnesses conditioned on templates encoding language-specific patterns (e.g., Java exception handling, C++ RAII), and (3)~compilation and short fuzzing trials filter invalid or low-coverage candidates.
-OSS-Fuzz-Gen's Java extension provides language-specific prompt templates that guide harness structure for Java libraries. 
-
+Tool-augmented reasoning equips LLMs with external capabilities they can invoke during generation~\cite{DBLP:conf/nips/SchickDSHWSCSW23:Toolformer,CITE:ToolLLM}. The ReAct (Reasoning and Acting) paradigm~\cite{DBLP:conf/iclr/YaoZYDN023:ReAct} formalizes tool use as an interleaved process: the model alternates between reasoning steps (generating natural language explanations of its strategy) and action steps (invoking tools and observing outputs). This loop continues until the model determines it has sufficient information to complete the task. ReAct-style agents have demonstrated substantial improvements over direct prompting on tasks requiring information retrieval, calculation, or interaction with external systems.
