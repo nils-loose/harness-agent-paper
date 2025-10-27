@@ -1,3 +1,4 @@
+
 \section{Evaluation}%
 \label{sec:evaluation}
 
@@ -5,24 +6,24 @@ We evaluate our harness generation approach on widely used Maven libraries, exam
 
 \subsection{Experimental Setup}%
 \label{subsec:exp-setup}
-\input{tables/benchmarks.tex}
+
 We evaluate on seven target methods from six widely-deployed Java libraries (Table~\ref{tab:benchmarks}). The selected targets span parsers (commons-cli, jsoup, antlr4), JSON libraries (gson, jackson-databind), and core utilities (guava).
 %
 %\paragraph{Baselines}
-We compare our generated harnesses against two baselines. OSS-Fuzz~\cite{CITE:OSSFuzz} is Google's continuous fuzzing service for open source software, launched in 2016 to provide large-scale fuzzing infrastructure. All selected target methods have existing harnesses in OSS-Fuzz. These harnesses serve as our primary baseline.
+We compare our generated harnesses against two baselines. OSS-Fuzz~\cite{oss-fuzz} is Google's continuous fuzzing service for open source software. All selected target methods have existing harnesses in OSS-Fuzz. These harnesses serve as our primary baseline.
 %
-We additionally compare against Jazzer AutoFuzz~\cite{CITE:Jazzer}, an automated harness generation mode built into the Jazzer coverage-guided fuzzer for the JVM. AutoFuzz leverages Java reflection to automatically generate harnesses by discovering accessible constructors and methods, recursively building required objects through structure-aware type instantiation. Unlike our approach, AutoFuzz operates without program analysis or coverage feedback, relying solely on runtime reflection to explore the API surface.
+We additionally compare against Jazzer AutoFuzz~\cite{jazzer}, an automated harness generation mode built into the Jazzer coverage-guided fuzzer for the JVM. AutoFuzz leverages Java reflection to automatically generate harnesses by discovering accessible constructors and methods, recursively building required objects through structure-aware type instantiation. Unlike our approach, AutoFuzz operates without program analysis or coverage feedback, relying solely on runtime reflection to explore the API surface.
 %
-For LLM-based comparison, we attempted to use OSS-Fuzz-Gen~\cite{CITE:OSSFuzzGen}, but encountered implementation issues, primarily in model output parsing, that prevented successful harness generation for our Java targets.
+For LLM-based comparison, we attempted to use OSS-Fuzz-Gen~\cite{oss-fuzz-gen}, but encountered implementation issues, primarily in model output parsing, that prevented successful harness generation for our Java targets despite several attempts at fixing the underlying issues.
 \par
-We implement our approach using LangGraph~\cite{langgraph2024} for workflow orchestration and Claude 4.5 Sonnet (2025-09-29) as the underlying model. Harnesses are compiled using Gradle and executed using Jazzer with instrumented coverage collection. Our implementation and generated harnesses are available on GitHub.\footnote{Repository anonymized for submission.}
+We implement our approach using LangGraph~\cite{langgraph} for workflow orchestration and Claude 4.5 Sonnet (2025-09-29) as the underlying model. Harnesses are compiled using Gradle and executed using Jazzer with instrumented coverage collection. Our implementation and generated harnesses are available on GitHub.\footnote{Repository anonymized for submission.}
 \par
-To measure the effectiveness of fuzzing the targeted method, we measure coverage under two configurations: (1)~method-targeted coverage activates only during target method execution (Section~\ref{subsec:static-analysis}), focusing metrics on target behavior; (2)~full target-scope coverage uses standard JaCoCo instrumentation across the entire library for fair baseline comparison.
-All campaigns are run for 12 hours per target with a single fuzzing thread and an empty seed corpus. 
-\subsection{Coverage Effectiveness}%
+To measure the effectiveness of fuzzing the targeted method, we measure coverage under two configurations: (1)~method-targeted coverage activates only during target method execution (Section~\ref{subsec:static-analysis}), focusing metrics on target behavior; (2)~full target-scope coverage uses standard JaCoCo instrumentation across the entire library for a fair baseline comparison.
+All campaigns are run for 12 hours per target with a single fuzzing thread and an empty seed corpus.
+\subsection{Coverage Effectiveness}
 \label{subsec:coverage-effectiveness}
-
 \input{figures/coverage-overall.tex}
+\input{figures/case-study-coverage.tex}
 
 Figure~\ref{fig:coverage-comparison} shows line coverage over time across five Java libraries. The top row compares method-targeted coverage for our generated harnesses against the OSS-Fuzz baseline, evaluating focused execution of target method logic. The bottom row shows full package-scope coverage allowing comparison against AutoFuzz.
 Under method-targeted coverage the generated harnesses have a median improvement of $26$\% over the OSS-Fuzz harnesses, demonstrating the effectiveness of our system in generating harnesses for specific methods. The temporal dynamics reveal that the primary difference is observable early into the fuzzing campaign, suggesting that the harness provides better structural input diversity.
@@ -34,30 +35,29 @@ Comparing under full target-scope coverage, our generated harnesses outperform t
 %Notably, gson and jackson-databind show continued coverage growth throughout the 12-hour campaign for our harnesses, while AutoFuzz plateaus within 3-4 hours. This sustained exploration indicates that our harnesses exercise diverse input patterns that trigger different code paths, whereas AutoFuzz's deterministic type coercion limits input space diversity.
 %
 \par
-\input{figures/case-study-coverage.tex}
 To demonstrate the benefits of targeted harness generation, we evaluate ANTLR4, which has two target methods in our benchmark. The existing OSS-Fuzz harness~\footnote{https://github.com/google/oss-fuzz/blob/master/projects/antlr4-java/GrammarFuzzer.java} exercises both methods sequentially. It creates a Grammar object from fuzzed input, then invokes \textit{createParserInterpreter} on the resulting grammar. This sequential dependency means the parser interpreter is only reached when grammar creation succeeds without throwing exceptions.
 We compare our automatically generated harnesses (each targeting one method individually) against the OSS-Fuzz harness measured with method-targeted coverage scoped to each target method. For the Grammar constructor (Figure~\ref{fig:antlr4-coverage}(a)), we evaluate both the unmodified OSS-Fuzz harness and a manually edited variant that only creates the grammar without invoking the parser interpreter. For \textit{createParserInterpreter} (Figure~\ref{fig:antlr4-coverage}(b)), we evaluate only the unmodified OSS-Fuzz harness.
-Our generated harnesses outperform the OSS-Fuzz baseline in both scenarios. Most notably, the OSS-Fuzz harness achieves 0\% coverage for \textit{createParserInterpreter} throughout the campaign, indicating that grammar creation consistently throws exceptions before reaching the parser interpreter call. In contrast, our generated harness successfully exercises this method by synthesizing inputs that satisfy the grammar constructor's preconditions. Note that both ANTLR4 campaigns encountered a Jazzer timeout at 30 minutes that terminates execution; we were unable to configure Jazzer to continue. However, the coverage trends before termination demonstrate the performance difference.
+Our generated harnesses outperform the OSS-Fuzz baseline in both scenarios. Most notably, the OSS-Fuzz harness achieves 0\% coverage for \textit{createParserInterpreter} throughout the campaign, indicating that grammar creation consistently throws exceptions before reaching the parser interpreter call. In contrast, our generated harness successfully exercises this method by synthesizing inputs that satisfy the grammar constructor's preconditions. Note that both ANTLR4 campaigns encountered a Jazzer timeout at 30 minutes that terminates Jazzer execution. However, the coverage trends before termination demonstrate the performance difference.
 %
 \subsection{Bug Discovery}%
 \label{subsec:bug-discovery}
-Beyond coverage metrics, we examine whether our generated harnesses discovers novel bugs during fuzzing campaigns. Jazzer reports crashes through its exception handling infrastructure, distinguishing between genuine crashes (uncaught exceptions indicating bugs) and caught exceptions that represent normal control flow. This represents a core challenge for the harness generation, as the generated harnesses must avoid over-catching exceptions that would mask real bugs while also preventing spurious crashes from expected error handling.
-Across the 12-hour fuzzing campaigns, the generated harnesses triggered a total of 14 crashes in two libraries. After manual investigation, we determine that all reported crashes represent genuine bugs in the target library. The harnesses correctly identified uncaught exceptions rather than reporting false positives from expected exception handling. Manual triage revealed 3 unique bugs:
+Beyond coverage metrics, we examine whether our generated harnesses discovers novel bugs during fuzzing campaigns. Jazzer reports crashes through its exception handling infrastructure, distinguishing between genuine crashes (uncaught exceptions indicating bugs) and caught exceptions that represent normal control flow. This represents a core challenge for the harness generation, as the generated harnesses must avoid over-catching exceptions that would mask real bugs while also separating spurious crashes from expected error handling.
+Across the 12-hour fuzzing campaigns, the generated harnesses triggered a total of 14 crashes in two libraries. After manual investigation, we determined that all reported crashes represent genuine bugs in the target library. The harnesses correctly identified uncaught exceptions rather than reporting false positives from expected exception handling. Manual triage revealed 3 unique bugs:
 
 \begin{itemize}
 \item \textbf{commons-cli}: Two distinct null pointer exceptions in option parsing logic, triggered by edge-case combinations of option configurations and malformed arguments. The crashes manifest in both long-option and short-option code paths, with 12 total crash artifacts reducing to 2 unique root causes.
-\item \textbf{jsoup}: One index-out-of-bounds exception in HTML tree building logic, triggered by complex malformed HTML input (~1KB). This crash represents a potential denial-of-service vector, as attackers could craft HTML to crash the parser. Two crash artifacts correspond to the same underlying bug.
+\item \textbf{jsoup}: One index-out-of-bounds exception in HTML tree building logic, triggered by complex malformed HTML input ($\sim 1KB$). This crash represents a potential denial-of-service vector, as attackers could craft HTML to crash the parser. Two crash artifacts correspond to the same underlying bug.
 \end{itemize}
 
 We are currently coordinating responsible disclosure with library maintainers. The commons-cli bugs represent robustness issues, while the jsoup bug has higher severity due to its potential impact on server-side HTML processing.
 These results demonstrate that our automatically-generated harnesses achieve sufficient input diversity and API coverage to discover real bugs in mature, widely-deployed libraries that already have existing harnesses in the OSS-Fuzz ecosystem. The fact that Jazzer reported zero false positives highlights the effectiveness of the harness generation in handling exceptions precisely to expose genuine bugs without over-catching.
 %
+\input{tables/harness-generation-cost.tex}
 \subsection{Generation Costs and Agent Behavior}%
 \label{subsec:generation-costs}
 %
-\input{tables/harness-generation-cost.tex}
 %
-Table~\ref{tab:generation-cost} details the computational costs and agent activity patterns across the five main targets. Harness generation costs range from \$1.34 (guava) to \$6.25 (commons-cli), with an average of \$3.20 per harness. Generation completes in an average of 599 seconds (~10 minutes), making the approach practical for integration into iterative fuzzing workflows.
+Table~\ref{tab:generation-cost} details the computational costs and agent activity patterns across the five main targets. Harness generation costs range from \$1.34 (guava) to \$6.25 (commons-cli), with an average of \$3.20 per harness. Generation completes in an average of 599 seconds, making the approach practical for integration into iterative fuzzing workflows.
 Token consumption directly correlates with workflow complexity. The observed diversity in workflow iterations and agent loops indicates effective adaptation to target-specific characteristics, with more complex APIs requiring additional research and refinement cycles while simpler targets lead to quicker convergence. 
 \par
 Comparing usage patterns between the research agent and the generation agent reveals that the initial report contains most of the necessary information for synthesis requiring on average only $3.1$ iterations until the first harness is synthesized. Additionally, the patching agent invocation pattern reveals that, in most cases, the initial synthesis is already correct and only few targets require repair iterations with all evaluated harnesses compiling successfully after at most $6$ iterations.
