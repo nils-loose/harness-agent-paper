@@ -39,8 +39,8 @@ If the compile step fails, a compilation agent iteratively resolves build errors
 
 Once compilation succeeds, the compiled harness is instrumented and executed under fuzzing to collect initial coverage data. An iterative refinement loop then uses this coverage feedback to improve harness effectiveness through two collaborative agents: a coverage analysis agent that interprets coverage gaps and decides whether refinement is worthwhile, and a refinement agent that modifies the harness.
 
-\paragraph{Coverage Analysis and Termination}
+%\paragraph{Coverage Analysis and Termination}
 To seed the coverage analysis, we merge method-level coverage data with the static callgraph to produce an annotated view showing coverage status for each reachable method, grouped by call depth from the target. The coverage analysis agent explores uncovered or partially covered methods by querying their source code and documentation to determine whether gaps reflect addressable harness deficiencies (missing input diversity, unexplored API paths) or fundamental limitations (unreachable defensive code, external I/O dependencies). The agent then makes a termination decision: stop if further refinement yields diminishing returns, or continue with a strategy targeting specific uncovered methods.
 
-\paragraph{Harness Refinement}
+%\paragraph{Harness Refinement}
 If refinement continues, the refinement agent receives the current harness code, the coverage analysis strategy (priority methods and improvement rationale), and annotated coverage data. The agent modifies the harness to exercise uncovered code paths through strategies such as diversifying input generation, invoking alternative API paths, or triggering exception handlers through edge-case inputs. The refined harness re-enters compilation and fuzzing, creating a feedback loop that continues until the coverage agent determines refinement yields diminishing returns or an iteration limit is reached. Convergence detection through code hashing prevents oscillation between semantically equivalent harness variants.

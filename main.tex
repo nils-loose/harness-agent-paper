@@ -45,7 +45,7 @@
 \copyrightyear{2018}
 \acmYear{2018}
 \acmDOI{XXXXXXX.XXXXXXX}
-\acmConference[Conference acronym 'XX]{Make sure to enter the correct
+\acmConference[SBFT '26]{Make sure to enter the correct
   conference title from your rights confirmation email}{June 03--05,
   2018}{Woodstock, NY}
 \acmISBN{978-1-4503-XXXX-X/2018/06}
@@ -57,7 +57,7 @@
 
 \begin{document}
 
-\title{Multi-Agent Driven Fuzz-Harness Generation}
+\title{Coverage-Guided Multi-Agent Harness Generation for Java Library Fuzzing}
 
 %%
 %% The "author" command and its associated commands are used to define
@@ -188,9 +188,11 @@ We evaluated our approach on seven target methods from six widely-deployed Java 
 \input{sections/evaluation.tex}
 \input{sections/related-work.tex}
 
-\section{Conclusion and Outlook}
+\section{Conclusion}
 
-We presented a multi-agent architecture that integrates LLM reasoning with code analysis to fully automate fuzzing harness generation for Java libraries. By combining query-driven information retrieval through the Model Context Protocol with method-targeted coverage instrumentation and agent-guided termination, our approach achieves competitive coverage with manually-written OSS-Fuzz baselines while discovering real vulnerabilities in production libraries. With generation costs averaging \$3.20 and approximately 10 minutes per harness, the approach demonstrates practical feasibility for integration into continuous fuzzing workflows.
+We presented a multi-agent architecture that automates fuzzing harness generation for Java libraries through specialized ReAct agents and query-driven code analysis. Five agents decompose the workflow into research, synthesis, compilation repair, coverage analysis, and refinement, querying documentation and source code on demand through the Model Context Protocol. Method-targeted coverage instrumentation and agent-guided termination enable effective refinement without context saturation.
+
+Evaluation on seven target methods from six widely deployed libraries demonstrates competitive coverage with manually written OSS-Fuzz baselines at practical costs of \$3.20 and 10 minutes per harness. Our harnesses discovered 3 previously unreported bugs in production libraries already integrated into OSS-Fuzz, validating that automated generation achieves sufficient quality for real vulnerability discovery. Future work includes extending to stateful APIs, dynamic callgraph refinement, and integration with OSS-Fuzz infrastructure for longitudinal evaluation.
 
 %\input{sections/threads-to-validity.tex}
 
