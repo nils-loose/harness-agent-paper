@@ -7,12 +7,12 @@ We evaluate our harness generation approach on widely used Maven libraries, exam
 \label{subsec:exp-setup}
 \input{tables/benchmarks.tex}
 We evaluate on seven target methods from six widely-deployed Java libraries (Table~\ref{tab:benchmarks}). The selected targets span parsers (commons-cli, jsoup, antlr4), JSON libraries (gson, jackson-databind), and core utilities (guava).
-
+%
 %\paragraph{Baselines}
 We compare our generated harnesses against two baselines. OSS-Fuzz~\cite{CITE:OSSFuzz} is Google's continuous fuzzing service for open source software, launched in 2016 to provide large-scale fuzzing infrastructure. All selected target methods have existing harnesses in OSS-Fuzz. These harnesses serve as our primary baseline.
-
+%
 We additionally compare against Jazzer AutoFuzz~\cite{CITE:Jazzer}, an automated harness generation mode built into the Jazzer coverage-guided fuzzer for the JVM. AutoFuzz leverages Java reflection to automatically generate harnesses by discovering accessible constructors and methods, recursively building required objects through structure-aware type instantiation. Unlike our approach, AutoFuzz operates without program analysis or coverage feedback, relying solely on runtime reflection to explore the API surface.
-
+%
 For LLM-based comparison, we attempted to use OSS-Fuzz-Gen~\cite{CITE:OSSFuzzGen}, but encountered implementation issues, primarily in model output parsing, that prevented successful harness generation for our Java targets.
 \par
 We implement our approach using LangGraph~\cite{langgraph2024} for workflow orchestration and Claude 4.5 Sonnet (2025-09-29) as the underlying model. Harnesses are compiled using Gradle and executed using Jazzer with instrumented coverage collection. Our implementation and generated harnesses are available on GitHub.\footnote{Repository anonymized for submission.}
